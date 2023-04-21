@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="1" name="{{proxy_name}}">
+  <DisplayName/>
+  <Description/>
+  <CreatedAt>1682044174218</CreatedAt>
+  <LastModifiedAt>1682044174218</LastModifiedAt>
+  <BasePaths>{{base_path}}}</BasePaths>
+  <ProxyEndpoints>
+    <ProxyEndpoint>default</ProxyEndpoint>
+  </ProxyEndpoints>
+  <TargetEndpoints>
+    <TargetEndpoint>default</TargetEndpoint>
+  </TargetEndpoints>
+</APIProxy>
