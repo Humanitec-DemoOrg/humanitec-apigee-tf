@@ -46,33 +46,50 @@ provider "apigee" {
 }
 
 resource "null_resource" "create_proxy_dir" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
   provisioner "local-exec" {  
-    command = "rm -rf apiproxy_dir 2> /dev/null && cp -r ${path.module}/proxy_template ${path.module}/apiproxy_dir"
+    command = "touch /tmp/hello.txt && rm -rf /tmp/apiproxy_dir 2> /dev/null && cp -r ${path.module}/proxy_template /tmp/apiproxy_dir"
   }
 
   provisioner "local-exec" {
-    command = "${var.sed_command} -i 's|{{base_path}}|${var.base_path}|g' ${path.module}/apiproxy_dir/apiproxy/proxies/default.xml"
+    command = "${var.sed_command} -i 's|{{base_path}}|${var.base_path}|g' /tmp/apiproxy_dir/apiproxy/proxies/default.xml"
   }
 
   provisioner "local-exec" {
-    command = "${var.sed_command} -i 's|{{target_url}}|${var.target_url}|g' ${path.module}/apiproxy_dir/apiproxy/targets/default.xml"
+    command = "${var.sed_command} -i 's|{{target_url}}|${var.target_url}|g' /tmp/apiproxy_dir/apiproxy/targets/default.xml"
   }
 
   provisioner "local-exec" {
-    command = "${var.sed_command} -i 's|{{proxy_name}}|${var.proxy_name}|g' ${path.module}/apiproxy_dir/apiproxy/manifest.xml"
+    command = "${var.sed_command} -i 's|{{proxy_name}}|${var.proxy_name}|g' /tmp/apiproxy_dir/apiproxy/manifest.xml"
   }
 
   provisioner "local-exec" {
-    command = "${var.sed_command} -i 's|{{base_path}}|${var.base_path}|g' ${path.module}/apiproxy_dir/apiproxy/manifest.xml"
+    command = "${var.sed_command} -i 's|{{base_path}}|${var.base_path}|g' /tmp/apiproxy_dir/apiproxy/manifest.xml"
   }
 }
 
 data "archive_file" "proxy_zip" {
   type        = "zip"
-  source_dir = "${path.module}/apiproxy_dir"
-  output_path = "${path.module}/proxy.zip"
+  source_dir = data.null_data_source.wait_for_zip.outputs.source_dir
+  output_path = "/tmp/proxy.zip"
 
   depends_on = [null_resource.create_proxy_dir]
+}
+
+data "null_data_source" "wait_for_zip" {
+  inputs = {
+    # This ensures that this data resource will not be evaluated until
+    # after the null_resource has been created.
+    templater_id = "${null_resource.create_proxy_dir.id}"
+
+    # This value gives us something to implicitly depend on
+    # in the archive_file below.
+    output_path = "/tmp/proxy.zip"
+    source_dir = "/tmp/apiproxy_dir"
+  }
 }
 
 resource "apigee_proxy" "example" {
