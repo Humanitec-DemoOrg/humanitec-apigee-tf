@@ -1,6 +1,5 @@
 variable apigee_org_id {
   type = string
-  default = "praxis-backup-383522"
 }
 
 variable google_access_token {
