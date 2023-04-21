@@ -2,10 +2,6 @@ variable apigee_org_id {
   type = string
 }
 
-variable google_access_token {
-  type = string
-}
-
 variable proxy_name {
   type = string
   default = "example"
@@ -30,6 +26,10 @@ variable sed_command {
   default = "sed"
 }
 
+variable gcp_credentials_b64 {
+  type = string
+}
+
 terraform {
   required_providers {
     apigee = {
@@ -39,9 +39,17 @@ terraform {
   }
 }
 
+provider "google" {
+  credentials = base64decode(var.gcp_credentials_b64)
+}
+
+data "google_client_config" "default" {
+  provider = google
+}
+
 provider "apigee" {
   organization = var.apigee_org_id
-  access_token = var.google_access_token
+  access_token = data.google_client_config.default.access_token
   server       = "apigee.googleapis.com"
 }
 
