@@ -86,3 +86,7 @@ resource "apigee_proxy_deployment" "example" {
   environment_name = var.environment_name
   revision = apigee_proxy.example.revision
 }
+
+output proxy_name {
+  value       = apigee_proxy.example.name
+}
