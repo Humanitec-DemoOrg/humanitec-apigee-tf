@@ -95,7 +95,7 @@ data "null_data_source" "wait_for_zip" {
 resource "apigee_proxy" "example" {
   name = var.proxy_name
   bundle = data.archive_file.proxy_zip.output_path
-  bundle_hash = filebase64sha256(data.archive_file.proxy_zip.output_path)
+  bundle_hash = filebase64sha256(data.null_data_source.wait_for_zip.outputs.output_path)
 }
 
 resource "apigee_proxy_deployment" "example" {
